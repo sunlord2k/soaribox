@@ -14,8 +14,8 @@ if [ $CARDAVOGN -gt 0 ]
 then
 	echo "OGN Card available -> starting SoftRF" >> $SOARIHOME/soaribox.log
 	/bin/stty -F $SERIAL 9600 raw &
-	/bin/cat $SERIAL | $SOARIHOME/softrf/SoftRF $ARGSOFTRF | /bin/netcat -l 10110 -k &
- 	echo "OGN Card sucessfully started" >> $SOARIHOME/soaribox.log
+	{ echo "{class:SOFTRF,protocol:"$SOFTRFPROT"}" ; /bin/cat $SERIAL ; } | $SOARIHOME/softrf/SoftRF $ARGSOFTRF | /bin/netcat -l 10110 -k 
+	echo "OGN Card sucessfully started" >> $SOARIHOME/soaribox.log
 
 else
 	echo "OGN Card not available" >> $SOARIHOME/soaribox.log

@@ -1,6 +1,6 @@
 #!/bin/bash
 while [ true ]; do
- sleep 2
+ sleep 4
 # /usr/bin/wget -q -O - http://localhost/dump1090/data/aircraft.json | nc -N localhost 30008
  /usr/bin/wget -q -O - http://localhost/dump1090/data/aircraft.json | nc -N localhost 30007
  

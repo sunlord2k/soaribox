@@ -19,7 +19,7 @@ Config file for lighttpd goes from /etc/soaribox/dump1090/89.... to /etc/lighttp
 Probably some more stuff which I forgot but will be added to install.sh
 
 
-#Pathes & things to know:
+# Pathes & things to know:
 
 Logfiles: /etc/soaribox/soaribox.log
-
+Status of dump1090 can be obtained via systemctl dump1090

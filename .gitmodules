@@ -1,3 +1,6 @@
 [submodule "librarys/INA3221"]
 	path = librarys/INA3221
 	url = https://github.com/switchdoclabs/SDL_Pi_INA3221
+[submodule "librarys/py-lubbcm2835"]
+	path = librarys/py-lubbcm2835
+	url = https://github.com/mubeta06/py-libbcm2835

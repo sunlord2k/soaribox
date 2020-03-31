@@ -1,0 +1,3 @@
+[submodule "librarys/INA3221"]
+	path = librarys/INA3221
+	url = https://github.com/switchdoclabs/SDL_Pi_INA3221

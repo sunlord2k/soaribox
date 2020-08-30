@@ -4,7 +4,7 @@
 . /etc/soaribox/soaribox.conf
 
 # Write bootup to log file
-echo "$(date): Booting up OpenMaStAr." >> $SOARIHOME/soaribox.log
+echo "$(date): Booting up OpenMaStAr." >> $SOARILOG/soaribox.log
 
 
 

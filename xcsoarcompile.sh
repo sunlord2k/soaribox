@@ -1,0 +1,3 @@
+#!/bin/bash
+apt-get install git screen make g++ zlib1g-dev libsdl1.2-dev libfreetype6-dev libpng-dev libjpeg-dev libcurl4-openssl-dev libxml-parser-perl librsvg2-bin xsltproc imagemagick gettext fonts-dejavu librsvg2-bin xsltproc imagemagick gettext libinput-dev ffmpeg libboost1.67-* quilt lua5.2 liblua5.2* libtiff-dev libgeotiff-dev && git clone https://github.com/XCSoar/XCSoar && cd XCSoar/ && git pull && git submodule init && git submodule update && cd .. && git clone https://github.com/jedisct1/libsodium --branch stable && cd libsodium/ && ./configure && make -j4 && make check && sudo make install && cd .. && cd XCSoar/ && make -j8
+

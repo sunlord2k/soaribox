@@ -29,7 +29,8 @@ fi
 if [ $STARTXCSOAR -gt 0 ]
 then
 	 echo "Xcsoar Startup active -> Starting now" >> $SOARIHOME/soaribox.log
-	/usr/bin/xcsoar
+#	/usr/bin/xcsoar
+	python $SOARIHOME/Start_SoariBox.py
 else
 	 echo "Xcsoar Startup deactivated" >> $SOARIHOME/soaribox.log
 fi

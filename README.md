@@ -22,5 +22,7 @@ Probably some more stuff which I forgot but will be added to install.sh
 # Pathes & things to know:
 
 Logfiles: /etc/soaribox/soaribox.log
+
 Status of dump1090 can be obtained via systemctl dump1090
+
 jsoncopy takes care of feeding dump1090 Data to SoftRF

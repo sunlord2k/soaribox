@@ -51,7 +51,7 @@ class GpsPoller(threading.Thread):
         try:
             while True:
                 self.current_value = self.session.next()
-                time.sleep(0.2) # tune this, you might not get values that quickly
+                time.sleep(0.2)  # tune this, you might not get values that quickly
         except StopIteration:
             pass
 
@@ -67,7 +67,9 @@ class data:
         'gps_NMEA': '0',
         'flarm_NMEA': '0',
         'gps_long': '0',
+        'gps_long_dec': '0',
         'gps_lat': '0',
+        'gps_lat_dec': '0',
         'gps_time_utc': '0',
         'gps_altitude': '0',
         'gps_speed_ms': '0',
@@ -131,10 +133,10 @@ def start_gps_sensor2(*args):
             datastorage['gps_time_utc'] = latestdata.time
             datastorage['gps_altitude'] = latestdata.alt
             datastorage['gps_speed_ms'] = latestdata.speed
-            datastorage['gps_sats'] = 10 #  Still under testing
+            datastorage['gps_sats'] = 10  # Still under testing
             datastorage['gps_fix_mode'] = latestdata.mode
             datastorage['gps_track'] = 0
-        sleep(1)
+        sleep(gps_sleep_time)
 
 
 def start_influx_logging(*args):
@@ -186,6 +188,8 @@ def nmea_out(*args):
             nmea_lon = dms(datastorage['gps_long'])
             nmea_lat_temp = datastorage['gps_lat']
             nmea_lon_temp = datastorage['gps_long']
+            datastorage['gps_long_dec'] = nmea_lon_temp
+            datastorage['gps_lat_dec'] = nmea_lat_temp
             nmea_lon_test = dec2dms(nmea_lon_temp)
             nmea_lat_test = dec2dms(nmea_lat_temp)
 #            nmea_lat_test = '5252.56'
@@ -252,7 +256,7 @@ def dec2dms(dec):
     return (returnvalue)
 
 
-if __name__ == '__main__':
+def starthandler():
     try:
         storage = data()  # Zentraler Datenspeicher
         if gps_source == 'GPS_SENSOR':  # GPS Empfaenger verbungden
@@ -280,3 +284,7 @@ if __name__ == '__main__':
             sleep(1)
     except:
         print('The End')
+
+
+if __name__ == '__main__':
+    starthandler()

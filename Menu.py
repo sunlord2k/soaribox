@@ -2,6 +2,8 @@
 from configparser import ConfigParser
 from tkinter import *
 from tkinter.ttk import *
+import os
+
 
 def donothing():
     print("Do nothing")

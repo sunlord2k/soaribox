@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import os
 from gps import *
-from time import *
+from time import sleep
 from configparser import ConfigParser
 import threading
 from influxdb import InfluxDBClient
@@ -12,28 +11,28 @@ import pynmea2
 import datetime
 import socket
 import math
-import csv
-import pandas as pd
 
 
-#  General Settings read:
-logging.basicConfig(filename='SoariBox.log', level=logging.DEBUG)
+#  Config Parser Init:
+logging.basicConfig(filename='SoariBox.log', level=logging.WARNING)
 config_file = ConfigParser()
 config_file.read("config.ini")
+# General Settings:
 debug = config_file.getboolean('GENERAL', 'debug')
-#  GPS Settings read
+#  GPS Settings:
 gps_sleep_time = config_file.getfloat('GPS', 'gps_refresh_speed')
 gps_source = config_file.get('GPS', 'gps_source')
 #  NMEA out settings:
-nmea_out_enabled = config_file.get('GENERAL', 'nmea_out_enabled')
-UDP_IP = "127.0.0.1"
-UDP_PORT = 10110
-# influxDB Config
-influx_host = 'localhost'  # Configparser to be added
-influx_port = 8086  # Configparser to be added
-influx_user = 'soaribox'  # Configparser to be added
-influx_pass = 'soaribox'  # Configparser to be added
-influx_db = 'soaribox'  # Configparser to be added
+nmea_out_enabled = config_file.get('NMEA', 'nmea_out_enabled')
+UDP_IP = config_file.get('NMEA', 'UDP_IP')
+UDP_PORT = int(config_file.get('NMEA', 'UDP_PORT'))
+nmea_refresh_speed = float(config_file.get('NMEA', 'nmea_refresh_speed'))
+# influxDB Config:
+influx_host = config_file.get('INFLUXDB', 'influx_host')
+influx_port = int(config_file.get('INFLUXDB', 'influx_port'))
+influx_user = config_file.get('INFLUXDB', 'influx_user')
+influx_pass = config_file.get('INFLUXDB', 'influx_pass')
+influx_db = config_file.get('INFLUXDB', 'influx_db')
 influx_logging = config_file.get('INFLUXDB', 'influx_logging')
 influx_logging_speed = config_file.getfloat('INFLUXDB', 'influx_logging_speed')
 
@@ -53,14 +52,9 @@ class GpsPoller(threading.Thread):
         try:
             while True:
                 self.current_value = self.session.next()
-                time.sleep(0.2)  # tune this, you might not get values that quickly
+                time.sleep(gps_sleep_time)  # tune this, you might not get values that quickly
         except StopIteration:
             pass
-
-#    def run(self):
-#        global gpsd
-#        while gpsp.running:
-#            gpsd.next()
 
 
 class data:
@@ -91,22 +85,6 @@ class data:
 #        datastorage['gps_speed_kn'] = datastorage['gps_speed_ms'] * 1.943844
 
 
-def start_gps_sensor(*args):
-    print('Started GPS thread')
-    while True:
-        datastorage['gps_long'] = gpsd.fix.longitude
-        datastorage['gps_lat'] = gpsd.fix.latitude
-        datastorage['gps_time_utc'] = gpsd.fix.time
-        datastorage['gps_altitude'] = gpsd.fix.altitude
-        datastorage['gps_speed_ms'] = gpsd.fix.speed
-        datastorage['gps_sats'] = gpsd.satellites
-        datastorage['gps_fix_mode'] = int(gpsd.fix.mode)
-        datastorage['gps_track'] = gpsd.fix.track
-#        datastorage['gps_fix_mode'] = 2
-        logging.debug(datastorage)
-        time.sleep(gps_sleep_time)  # Update speed of GPS Date set in in config file
-
-
 def start_gps_sensor2(*args):
     while True:
         latestdata = gpsp.get_current_value()
@@ -119,18 +97,17 @@ def start_gps_sensor2(*args):
             datastorage['gps_fix_mode'] = int(latestdata.mode)
             if hasattr(latestdata, 'track'):
                 datastorage['gps_track'] = latestdata.track
-            else:
-                datastorage['gps_track'] = 0.0
+#            else:
+#                datastorage['gps_track'] = 0.0
 
             if hasattr(latestdata, 'alt'):
                 datastorage['gps_altitude'] = latestdata.alt
-            else:
-                datastorage['gps_altitude'] = 0.0
-        logging.debug(datastorage)
+#            else:
+#                datastorage['gps_altitude'] = 0.0
         sleep(gps_sleep_time)
 
 
-def start_influx_logging(*args):
+def start_influx_gps_logging(*args):
     while True:
         print('Started Influx Thread')
     #    while datastorage['gps_fix_mode'] < 3:
@@ -161,10 +138,9 @@ def start_influx_logging(*args):
                         ]
             influx_client = InfluxDBClient(influx_host, influx_port, influx_user, influx_pass, influx_db)
             influx_client.write_points(influx_json_body)
-            logging.debug('Data written to Influx_DB')
-            logging.debug(influx_json_body)
             if debug:
                 print(influx_json_body)
+                logging.debug('Data written to Influx_DB')
                 print('Data written to InFluxDB')
 
             time.sleep(influx_logging_speed)
@@ -176,7 +152,7 @@ def start_flarm_gps(*args):
 
 def nmea_out(*args):
     print('Started NMEA Output Thread')
-    logging.debug('NMEA output on port XYZ started')
+    logging.debug('NMEA output on' + str(UDP_IP) + ':' + str(UDP_PORT))
     while True:
         while int(datastorage['gps_fix_mode']) < 3:
             print('Waiting for Fix')
@@ -185,6 +161,9 @@ def nmea_out(*args):
         while datastorage['gps_fix_mode'] == 3 and str(datastorage['gps_track']) != 'nan':
             nmea_time_buf = datastorage['gps_time_utc']
             nmea_time = nmea_time_buf[11:13] + nmea_time_buf[14:16] + nmea_time_buf[17:19] + "." + nmea_time_buf[20:23]
+            nmea_date = nmea_time_buf[8:10] + nmea_time_buf[5:7] + nmea_time_buf[2:4]
+            print(nmea_time_buf)
+            print(nmea_date)
             nmea_track = str(datastorage['gps_track'])
             gps_speed_kn = datastorage['gps_speed_ms'] * 1.943844
             nmea_lon, lonneg = decdeg2dms(datastorage['gps_long'])
@@ -202,8 +181,8 @@ def nmea_out(*args):
             datastorage['gps_lat_dec'] = str(nmea_lat)
     #  NMEA Sentences Generation:
             nmea_GGA = pynmea2.GGA('GP', 'GGA', (nmea_time, nmea_lat, NS, nmea_lon, EW, '1', '12', '1.0', '0.0', 'M', '0.0', 'M', '', ''))
-            nmea_RMC = pynmea2.RMC('GP', 'RMC', (nmea_time, 'A', nmea_lat, NS, nmea_lon, EW, str(gps_speed_kn), nmea_track, '261220', '', ''))
-            nmea_GSA = pynmea2.GSA('GP', 'GSA', ('A', '3', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '1.0', '1.0', '1.0'))
+            nmea_RMC = pynmea2.RMC('GP', 'RMC', (nmea_time, 'A', nmea_lat, NS, nmea_lon, EW, str(gps_speed_kn), nmea_track, nmea_date, '', ''))
+#to be implemented            nmea_GSA = pynmea2.GSA('GP', 'GSA', ('A', '3', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '1.0', '1.0', '1.0'))
             crlf = "\r\n"
             sock.sendto(bytes(nmea_GGA), (UDP_IP, UDP_PORT))  # Send
             sock.sendto(bytes(crlf), (UDP_IP, UDP_PORT))
@@ -216,11 +195,10 @@ def nmea_out(*args):
             if debug:
                 print('Data send to UDP')
 
-            sleep(1)
+            sleep(nmea_refresh_speed)
 
 
 def decdeg2dms(dd):
-    print(dd)
     negative = dd < 0
     dd = abs(dd)
     if dd < 1:
@@ -250,7 +228,38 @@ def removepoint(val):
     return(result)
 
 
+def handle_unhandled(exc_type, exc_value, exc_traceback):
+    now = datetime.datetime.now()
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + 'Unhandled exception:', exc_info=(exc_type, exc_value, exc_traceback))
+
+
+def patch_threading_excepthook():
+    """Installs our exception handler into the threading modules Thread object
+    Inspired by https://bugs.python.org/issue1230540
+    """
+    old_init = threading.Thread.__init__
+
+    def new_init(self, *args, **kwargs):
+        old_init(self, *args, **kwargs)
+        old_run = self.run
+
+        def run_with_our_excepthook(*args, **kwargs):
+            try:
+                old_run(*args, **kwargs)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except:
+                sys.excepthook(*sys.exc_info())
+        self.run = run_with_our_excepthook
+    threading.Thread.__init__ = new_init
+
+
 def starthandler():
+    patch_threading_excepthook()
+    sys.excepthook = handle_unhandled
     try:
         storage = data()  # Zentraler Datenspeicher
         if gps_source == 'GPS_SENSOR':  # GPS Empfaenger verbungden
@@ -263,9 +272,8 @@ def starthandler():
             Y.start()
         else:  # GPS Daten vom Flamr werden verwendet
             start_flarm_gps()
-    #    start_influx_logging()
         if influx_logging == '1':
-            x = threading.Thread(target=start_influx_logging, args=(0,))
+            x = threading.Thread(target=start_influx_gps_logging, args=(0,))
             x.daemon = True
             x.start()
             print(nmea_out_enabled)
@@ -274,11 +282,13 @@ def starthandler():
             z = threading.Thread(target=nmea_out, args=(1,))
             z.daemon = True
             z.start()
+
         while True:
             sleep(1)
     except:
         print('The End')
-
+        print("Unhandled exception:", sys.exc_info()[0])
+        raise
 
 if __name__ == '__main__':
     starthandler()

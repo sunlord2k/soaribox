@@ -11,4 +11,6 @@ def startxcsoar(*args):
 
 xcsoar = threading.Thread(target=startxcsoar, args=(0,))
 xcsoar.start()
-datahandler.starthandler()
+startdatahandler = threading.Thread(target=datahandler.starthandler)
+startdatahandler.start()
+print('This is just a test!')

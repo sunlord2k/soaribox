@@ -35,7 +35,7 @@ influx_pass = config_file.get('INFLUXDB', 'influx_pass')
 influx_db = config_file.get('INFLUXDB', 'influx_db')
 influx_logging = config_file.get('INFLUXDB', 'influx_logging')
 influx_logging_speed = config_file.getfloat('INFLUXDB', 'influx_logging_speed')
-
+nmea_out_alive = False
 
 class GpsPoller(threading.Thread):
     def __init__(self):
@@ -79,9 +79,10 @@ class data:
         'test_dms': '0'
     }
 
-    def __init__(self, *args):
-        if datastorage['gps_speed_ms'] == 'nan':
-            datastorage['gps_speed_ms'] = '0'
+
+#    def __init__(self, *args):
+#        if datastorage['gps_speed_ms'] == 'nan':
+#            datastorage['gps_speed_ms'] = '0'
 #        datastorage['gps_speed_kn'] = datastorage['gps_speed_ms'] * 1.943844
 
 
@@ -152,6 +153,7 @@ def start_flarm_gps(*args):
 
 def nmea_out(*args):
     print('Started NMEA Output Thread')
+    global nmea_out_alive
     logging.debug('NMEA output on' + str(UDP_IP) + ':' + str(UDP_PORT))
     while True:
         while int(datastorage['gps_fix_mode']) < 3:
@@ -162,8 +164,6 @@ def nmea_out(*args):
             nmea_time_buf = datastorage['gps_time_utc']
             nmea_time = nmea_time_buf[11:13] + nmea_time_buf[14:16] + nmea_time_buf[17:19] + "." + nmea_time_buf[20:23]
             nmea_date = nmea_time_buf[8:10] + nmea_time_buf[5:7] + nmea_time_buf[2:4]
-            print(nmea_time_buf)
-            print(nmea_date)
             nmea_track = str(datastorage['gps_track'])
             gps_speed_kn = datastorage['gps_speed_ms'] * 1.943844
             nmea_lon, lonneg = decdeg2dms(datastorage['gps_long'])
@@ -182,7 +182,7 @@ def nmea_out(*args):
     #  NMEA Sentences Generation:
             nmea_GGA = pynmea2.GGA('GP', 'GGA', (nmea_time, nmea_lat, NS, nmea_lon, EW, '1', '12', '1.0', '0.0', 'M', '0.0', 'M', '', ''))
             nmea_RMC = pynmea2.RMC('GP', 'RMC', (nmea_time, 'A', nmea_lat, NS, nmea_lon, EW, str(gps_speed_kn), nmea_track, nmea_date, '', ''))
-#to be implemented            nmea_GSA = pynmea2.GSA('GP', 'GSA', ('A', '3', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '1.0', '1.0', '1.0'))
+#  to be implemented            nmea_GSA = pynmea2.GSA('GP', 'GSA', ('A', '3', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '1.0', '1.0', '1.0'))
             crlf = "\r\n"
             sock.sendto(bytes(nmea_GGA), (UDP_IP, UDP_PORT))  # Send
             sock.sendto(bytes(crlf), (UDP_IP, UDP_PORT))
@@ -196,6 +196,8 @@ def nmea_out(*args):
                 print('Data send to UDP')
 
             sleep(nmea_refresh_speed)
+            if not nmea_out_alive:
+                nmea_out_alive = True
 
 
 def decdeg2dms(dd):
@@ -257,8 +259,10 @@ def patch_threading_excepthook():
     threading.Thread.__init__ = new_init
 
 
-def starthandler():
+def starthandler(*args):
     patch_threading_excepthook()
+    global nmea_out_alive
+    global gps_sensor_alive
     sys.excepthook = handle_unhandled
     try:
         storage = data()  # Zentraler Datenspeicher
@@ -278,7 +282,7 @@ def starthandler():
             x.start()
             print(nmea_out_enabled)
 
-        if nmea_out_enabled == '1':
+        if nmea_out_enabled == '1' and not nmea_out_alive:
             z = threading.Thread(target=nmea_out, args=(1,))
             z.daemon = True
             z.start()
@@ -289,6 +293,7 @@ def starthandler():
         print('The End')
         print("Unhandled exception:", sys.exc_info()[0])
         raise
+
 
 if __name__ == '__main__':
     starthandler()

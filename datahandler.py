@@ -39,43 +39,85 @@ class configuration:
         self.influx_logging_speed = config_file.getfloat('INFLUXDB', 'influx_logging_speed')
 
 
-class watchdog:
-    def __init__(self, *args):
-        nmea_timeout = 0
-        influx_timeout = 0
-        gpspoller_timeout = 0
+class watchdog_local(threading.Thread):
+    def __init__(self, name, id, *args):
+        threading.Thread.__init__(self)
         self.startup_delay = 10
-        self.timeout = [0, 0, 0, 0, 0, 0]
+        self.timeout = 0
+        self.id = id
+        self.name = name
+        self.status = 0 # 0= Everthing okay, 1 = Prewarning 2 = Watchdog triggered 4 = Kill the Thread 9 = Starting UP
+        self.kill = 0
 
-    def watch(self):
+    def run(self):
+        self.status = 9
         for i in range(self.startup_delay, 0, -1):
-            global watchdog_Thread_kill_register
             self.startup_delay -= 1
             sleep(1)
-            print(self.startup_delay)
-            self.alive = [False, False, False, False, False, False]
-            self.timeout = [0, 0, 0, 0, 0, 0]
-        while watchdog_Thread_kill_register[0] == 0:
-            for i in range(0, 4):
-                if self.alive[i]:
-                    self.alive[i] = False
-                    self.timeout[i] = 0
-                else:
-                    self.timeout[i] += 1
-                    print("Watchdog Message: timeout:" + str(self.timeout[i]) + "s")
-                    print(watchdog_Thread_kill_register)
-                    if self.timeout[i] > 15:
-                        watchdog_Thread_kill_register = [1, 1, 1, 1, 1, 1]
-                        now = datetime.datetime.now()
-                        logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and is about to kill all Threads")
-                        print(watchdog_Thread_kill_register)
-                        print("The Watchdog is terminating itself!")
-                        break
-#                        raise ValueError('The Watchdog killed itself')
+            print("Startup in: " + str(self.startup_delay) + "s Thread: " + str(self.id))
+        self.status = 0
+        while self.status < 4:
+            self.timeout += 1
+            self.statuscalc()
+            global watchdog_global
+            self.status = watchdog_global.dataexchange(self.id, self.name, self.status)
+            print("Watchdog " + self.name + "Message: timeout:" + str(self.timeout) + "s")
+            if self.status > 2:
+                    now = datetime.datetime.now()
+                    logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog of Thread " + self.name + " was triggered!" )
+                    print(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog of Thread " + self.name + " was triggered!" )
+                    break
+#                        Call of main wachdog to be implemented: give 3 arguments: trigger , name  and thread id
             sleep(1)
 
-    def resettimeout(self, ThreadID, *args):
-        self.timeout[ThreadID] = 0
+    def resettimeout(self, *args):
+        self.timeout = 0
+
+    def statuscalc(self, *args):
+        if self.timeout < 2:
+            self.status = 0
+        elif self.timeout < 15 and self.timeout > 2:
+            self.status = 1
+        else:
+            self.status = 3
+
+
+class watchdog(threading.Thread):
+    def __init__(self, *args):
+        threading.Thread.__init__(self)
+        self.threads = threading.active_count()
+        self.registeredthreads = 0
+        self.threadids = []
+        self.threadnames = []
+        self.threadstatus = []
+
+
+    def run(self):
+        print(self.threads)
+        while True:
+            print("Threadids: " + str(self.threadids))
+            print("Threadnames: " + str(self.threadnames))
+            print("Threadstatus: " + str(self.threadstatus))
+            sleep(1)
+
+    def dataexchange(self, threadid, threadname, threadstatus, *args):
+        registered = False
+        for x in self.threadids: # Check if thread has already been registif item == threadid:
+                if x == threadid:
+                    registered = True
+
+        if registered is False:
+            self.threadids.append(threadid)
+            self.threadnames.append(threadname)
+            self.threadstatus.append(threadstatus)
+
+        for x in self.threadstatus:
+            if x == 4:
+                return 4
+            else:
+                return 0
+
+
 
 
 class GpsPoller(configuration, threading.Thread):
@@ -90,17 +132,13 @@ class GpsPoller(configuration, threading.Thread):
         return self.current_value
 
     def run(self):
-        global watchdog_Thread_kill_register, nmea_dog
         try:
+            local_dog = watchdog_local("gps-poller", threading.current_thread().ident)
+            local_dog.start()
             while watchdog_Thread_kill_register[1] == 0:
                 self.current_value = self.session.next()
                 time.sleep(c.gps_sleep_time)  # tune this, you might not get values that quickly
-                if watchdog_Thread_kill_register[1] == 1:
-                    now = datetime.datetime.now()
-                    logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the GPS Poller thread")
-                    break
-                nmea_dog.resettimeout(0)
-
+                local_dog.resettimeout()
         except StopIteration:
             pass
 
@@ -115,8 +153,9 @@ class GpsPoller(configuration, threading.Thread):
 
 class nmea_out(configuration):
     def start_gps_sensor2(self, *args):
-        global watchdog_Thread_kill_register, nmea_dog
-        while watchdog_Thread_kill_register[2] == 0:
+        local_dog = watchdog_local("nmea_out", threading.current_thread().ident)
+        local_dog.start()
+        while True:
             latestdata = gpsp.get_current_value()
             if latestdata['class'] == 'TPV':
                 datastorage['gps_long'] = latestdata.lon
@@ -129,14 +168,17 @@ class nmea_out(configuration):
                     datastorage['gps_track'] = latestdata.track
                 if hasattr(latestdata, 'alt'):
                     datastorage['gps_altitude'] = latestdata.alt
-            sleep(c.gps_sleep_time)
+            else:
+                sleep(c.gps_sleep_time)
+
             if watchdog_Thread_kill_register[2] == 1:
                 print("The Watchdog was triggered and killed the GPS to datastorage thread")
                 now = datetime.datetime.now()
                 logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the GPS to datastorage thread")
                 break
-            nmea_dog.resettimeout(1)
-            print("GPS sensor Thread alive!")
+#            nmea_dog.resettimeout(1)
+#            print("GPS sensor Thread alive!")
+            local_dog.resettimeout()
 
     def start_influx_gps_logging(self, *args):
         global watchdog_Thread_kill_register, nmea_dog
@@ -148,7 +190,7 @@ class nmea_out(configuration):
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the InFluxDB thread")
                     break
-                nmea_dog.resettimeout(3)
+#                nmea_dog.resettimeout(3)
                 sleep(1)
 
         #    while datastorage['gps_fix_mode'] > 3:
@@ -180,7 +222,7 @@ class nmea_out(configuration):
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the InFluxDB thread")
                     break
-                nmea_dog.resettimeout(3)
+#                nmea_dog.resettimeout(3)
                 time.sleep(c.influx_logging_speed)
 
     def start_flarm_gps(self, *args):
@@ -197,7 +239,7 @@ class nmea_out(configuration):
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the NMEA out thread")
                     break
-                nmea_dog.resettimeout(4)
+#                nmea_dog.resettimeout(4)
                 print('NMEA Thread: Waiting for Fix')
                 sleep(1)
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -225,7 +267,6 @@ class nmea_out(configuration):
                 nmea_RMC = pynmea2.RMC('GP', 'RMC', (nmea_time, 'A', nmea_lat, NS, nmea_lon, EW, str(gps_speed_kn), nmea_track, nmea_date, '', ''))
     #  to be implemented            nmea_GSA = pynmea2.GSA('GP', 'GSA', ('A', '3', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '1.0', '1.0', '1.0'))
                 crlf = "\r\n"
-                print(nmea_GGA)
                 nmea_GGA2 = str(nmea_GGA)
                 nmea_RMC2 = str(nmea_RMC)
                 sock.sendto(str.encode(nmea_GGA2), (c.UDP_IP, c.UDP_PORT))  # Send
@@ -240,13 +281,13 @@ class nmea_out(configuration):
                     print('Data send to UDP')
 
                 sleep(c.nmea_refresh_speed)
-                nmea_dog.resettimeout(2)
+#                nmea_dog.resettimeout(2)
                 if watchdog_Thread_kill_register[0] == 1:
                     print("The Watchdog was triggered and killed the NMEA out thread")
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the NMEA out thread")
                     break
-                nmea_dog.resettimeout(4)
+#                nmea_dog.resettimeout(4)
 
     def decdeg2dms(self, dd):
         negative = dd < 0
@@ -328,21 +369,21 @@ def starthandler(*args):
         'gps_track': '0',
     }
     sys.excepthook = handle_unhandled
-    try:
-        print("NMEA out Thread started")
-        nmea_dog = watchdog()
-        dog = threading.Thread(target=nmea_dog.watch(), args=(1))
-        dog.daemon = True
-        dog.start()
-    except:
-        print("Unhandled exception:", sys.exc_info()[0])
-        raise
+#    try:
+#        print("NMEA out Thread started")
+#        nmea_dog = watchdog()
+#        dog = threading.Thread(target=nmea_dog.watch(), args=(1))
+#        dog.daemon = True
+#        dog.start()
+#    except:
+#        print("Unhandled exception:", sys.exc_info()[0])
+#        raise
 
     try:
         if c.gps_source == 'GPS_SENSOR':  # GPS Empfaenger verbungden
             global gpsp
             gpsp = GpsPoller()  # create the thread
-            gpsp.daemon = True
+#            gpsp.daemon = True
             gpsp.start()  # start it up
             Y = threading.Thread(target=out.start_gps_sensor2, args=(0,))
             Y.daemon = True
@@ -372,6 +413,15 @@ def starthandler(*args):
     except:
         print("Unhandled exception:", sys.exc_info()[0])
         raise
+
+    try:
+        global watchdog_global
+        watchdog_global = watchdog()
+        watchdog_global.start()
+    except:
+        print("Unhandled exception:", sys.exc_info()[0])
+        raise
+
 
 #    while True:
 #        sleep(1)

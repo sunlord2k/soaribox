@@ -11,6 +11,7 @@ import pynmea2
 import datetime
 import socket
 import math
+import os
 
 
 class configuration:
@@ -21,6 +22,7 @@ class configuration:
         config_file.read("config.ini")
         # General Settings:
         self.debug = config_file.getboolean('GENERAL', 'debug')
+        self.killit = config_file.getboolean('GENERAL', 'killit')
         #  GPS Settings:
         self.gps_sleep_time = config_file.getfloat('GPS', 'gps_refresh_speed')
         self.gps_source = config_file.get('GPS', 'gps_source')
@@ -56,13 +58,12 @@ class watchdog_local(threading.Thread):
             sleep(1)
             print("Startup in: " + str(self.startup_delay) + "s Thread: " + str(self.id))
         self.status = 0
-        while self.status < 4:
+        while not self.status == 4:
             self.timeout += 1
             self.statuscalc()
             global watchdog_global
-            self.status = watchdog_global.dataexchange(self.id, self.name, self.status)
-            print("Watchdog " + self.name + "Message: timeout:" + str(self.timeout) + "s")
-            if self.status > 2:
+            self.status = watchdog_global.dataexchange(self.id, self.name, self.status, self.timeout)
+            if self.status == 4:
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog of Thread " + self.name + " was triggered!" )
                     print(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog of Thread " + self.name + " was triggered!" )
@@ -90,17 +91,22 @@ class watchdog(threading.Thread):
         self.threadids = []
         self.threadnames = []
         self.threadstatus = []
+        self.threadtimeout = []
+        self.firsttime = True
 
 
     def run(self):
         print(self.threads)
         while True:
+            os.system('clear')
+            x = False
             print("Threadids: " + str(self.threadids))
             print("Threadnames: " + str(self.threadnames))
             print("Threadstatus: " + str(self.threadstatus))
+            print("Threadtimeout" + str(self.threadtimeout))
             sleep(1)
 
-    def dataexchange(self, threadid, threadname, threadstatus, *args):
+    def dataexchange(self, threadid, threadname, threadstatus, threadtimeout, *args):
         registered = False
         for x in self.threadids: # Check if thread has already been registif item == threadid:
                 if x == threadid:
@@ -110,6 +116,7 @@ class watchdog(threading.Thread):
             self.threadids.append(threadid)
             self.threadnames.append(threadname)
             self.threadstatus.append(threadstatus)
+            self.threadtimeout.append(threadtimeout)
 
         for x in self.threadstatus:
             if x == 4:
@@ -127,6 +134,7 @@ class GpsPoller(configuration, threading.Thread):
         self.session = gps(mode=WATCH_ENABLE)  # starting the stream of info
         self.current_value = None
         self.running = True  # setting the thread running to true
+        self.lock = threading.Lock()
 
     def get_current_value(self):
         return self.current_value
@@ -135,65 +143,58 @@ class GpsPoller(configuration, threading.Thread):
         try:
             local_dog = watchdog_local("gps-poller", threading.current_thread().ident)
             local_dog.start()
-            while watchdog_Thread_kill_register[1] == 0:
+            print("Local_dog_status:" + str(local_dog.status))
+            while not local_dog.status == 4:
+                self.lock.acquire()
                 self.current_value = self.session.next()
+                self.lock.release()
                 time.sleep(c.gps_sleep_time)  # tune this, you might not get values that quickly
                 local_dog.resettimeout()
         except StopIteration:
             pass
 
-    def get_id(self):
-        # returns id of the respective thread
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
-        for id, thread in threading._active.items():
-            if thread is self:
-                return id
-
 
 class nmea_out(configuration):
+    def __init__(self, *args):
+        self.lock = threading.Lock()
+
     def start_gps_sensor2(self, *args):
         local_dog = watchdog_local("nmea_out", threading.current_thread().ident)
         local_dog.start()
-        while True:
+        while not local_dog.status == 4:
+            self.lock.acquire()
             latestdata = gpsp.get_current_value()
-            if latestdata['class'] == 'TPV':
-                datastorage['gps_long'] = latestdata.lon
-                datastorage['gps_lat'] = float(latestdata.lat)
-                datastorage['gps_time_utc'] = latestdata.time
-                datastorage['gps_speed_ms'] = latestdata.speed
-                datastorage['gps_sats'] = 10  # Still under testing
-                datastorage['gps_fix_mode'] = int(latestdata.mode)
-                if hasattr(latestdata, 'track'):
-                    datastorage['gps_track'] = latestdata.track
-                if hasattr(latestdata, 'alt'):
-                    datastorage['gps_altitude'] = latestdata.alt
-            else:
-                sleep(c.gps_sleep_time)
+            if hasattr(latestdata, 'class'):
+                if latestdata['class'] == 'TPV':
+                    datastorage['gps_long'] = latestdata.lon
+                    datastorage['gps_lat'] = float(latestdata.lat)
+                    datastorage['gps_time_utc'] = latestdata.time
+                    datastorage['gps_speed_ms'] = latestdata.speed
+                    datastorage['gps_sats'] = 10  # Still under testing
+                    datastorage['gps_fix_mode'] = int(latestdata.mode)
+                    if hasattr(latestdata, 'track'):
+                        datastorage['gps_track'] = latestdata.track
+                    if hasattr(latestdata, 'alt'):
+                        datastorage['gps_altitude'] = latestdata.alt
+                    self.lock.release()
+                else:
+                    self.lock.release()
+                    sleep(c.gps_sleep_time)
+                local_dog.resettimeout()
 
-            if watchdog_Thread_kill_register[2] == 1:
-                print("The Watchdog was triggered and killed the GPS to datastorage thread")
-                now = datetime.datetime.now()
-                logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the GPS to datastorage thread")
-                break
-#            nmea_dog.resettimeout(1)
-#            print("GPS sensor Thread alive!")
-            local_dog.resettimeout()
+        print("The Watchdog was triggered and killed the GPS to datastorage thread")
+        now = datetime.datetime.now()
+        logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the GPS to datastorage thread")
 
     def start_influx_gps_logging(self, *args):
-        global watchdog_Thread_kill_register, nmea_dog
-        while watchdog_Thread_kill_register[3] == 0:
+        local_dog = watchdog_local("InFluxDB-logging", threading.current_thread().ident)
+        local_dog.start()
+        while not local_dog.status == 4:
             while int(datastorage['gps_fix_mode']) < 3 or str(datastorage['gps_track']) == 'nan':
                 print('InFlux Thread: Waiting for Fix')
-                if watchdog_Thread_kill_register[3] == 1:
-                    print("The Watchdog was triggered and killed the InFluxDB thread")
-                    now = datetime.datetime.now()
-                    logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the InFluxDB thread")
-                    break
-#                nmea_dog.resettimeout(3)
+                local_dog.resettimeout()
                 sleep(1)
 
-        #    while datastorage['gps_fix_mode'] > 3:
             while datastorage['gps_fix_mode'] == 3 and str(datastorage['gps_track']) != 'nan':
                 influx_json_body = [
                     {
@@ -213,16 +214,12 @@ class nmea_out(configuration):
                             ]
                 influx_client = InfluxDBClient(c.influx_host, c.influx_port, c.influx_user, c.influx_pass, c.influx_db)
                 influx_client.write_points(influx_json_body)
-                if c.debug:
-                    print(influx_json_body)
-                    logging.debug('Data written to Influx_DB')
-                    print('Data written to InFluxDB')
-                if watchdog_Thread_kill_register[3] == 1:
+                if local_dog.status == 4:
                     print("The Watchdog was triggered and killed the InFluxDB thread")
                     now = datetime.datetime.now()
                     logging.critical(now.strftime("%Y-%m-%d %H:%M:%S") + "The Watchdog was triggered and killed the InFluxDB thread")
                     break
-#                nmea_dog.resettimeout(3)
+                local_dog.resettimeout()
                 time.sleep(c.influx_logging_speed)
 
     def start_flarm_gps(self, *args):
@@ -281,7 +278,6 @@ class nmea_out(configuration):
                     print('Data send to UDP')
 
                 sleep(c.nmea_refresh_speed)
-#                nmea_dog.resettimeout(2)
                 if watchdog_Thread_kill_register[0] == 1:
                     print("The Watchdog was triggered and killed the NMEA out thread")
                     now = datetime.datetime.now()
@@ -399,7 +395,6 @@ def starthandler(*args):
             x = threading.Thread(target=out.start_influx_gps_logging, args=(0,))
             x.daemon = True
             x.start()
-            print(c.nmea_out_enabled)
             print("InfluX Thread Started")
     except:
         print("Unhandled exception:", sys.exc_info()[0])

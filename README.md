@@ -10,7 +10,8 @@ cd /home/pi
 git clone https://github.com/sunlord2k/soaribox
 
 Add the following line to /etc/rc.local
-sudo python /home/pi/soaribox/install.py &
+sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py > /home/pi/soaribox/install.log 2>&1' &
+
 
 
 

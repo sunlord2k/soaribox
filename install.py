@@ -17,6 +17,6 @@ if firstboot is True:
     boot_file.write('hdmi_drive=1\n')
 
     config_file.set('GENERAL', 'firstboot', 'False')
-    config_file.write(open("config.ini", "w"))
+    config_file.write(open('/home/pi/soaribox/config.ini', 'w'))
     sleep(1)
     os.system('sudo shutdown -r now')

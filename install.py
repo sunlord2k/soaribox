@@ -5,7 +5,7 @@ from configparser import ConfigParser
 
 #Read Config File:
 config_file = ConfigParser()
-config_file.read("config.ini")
+config_file.read("/home/pi/soaribox/config.ini")
 firstboot = config_file.getboolean('GENERAL', 'firstboot')
 
 if firstboot:

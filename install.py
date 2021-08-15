@@ -8,7 +8,7 @@ config_file = ConfigParser()
 config_file.read("/home/pi/soaribox/config.ini")
 firstboot = config_file.getboolean('GENERAL', 'firstboot')
 
-if firstboot:
+if firstboot is True:
     boot_file = open('/boot/config.txt', 'a')
     boot_file.write('\nhdmi_force_hotplug=1\n')
     boot_file.write('hdmi_group=2\n')

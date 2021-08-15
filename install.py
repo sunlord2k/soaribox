@@ -21,6 +21,7 @@ if firstboot is True:
     print('SOARIBOX: Inserting WLAN Config')
     wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
     wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
+    ssh_file = open('/boot/ssh', 'w')
 
     config_file.set('GENERAL', 'firstboot', 'False')
     config_file.write(open('/home/pi/soaribox/config.ini', 'w'))
@@ -28,4 +29,4 @@ if firstboot is True:
     sleep(1)
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(10)
-    os.system('sudo shutdown -r now')
+#    os.system('sudo shutdown -r now')

@@ -6,7 +6,7 @@ from configparser import ConfigParser
 #Read Config File:
 config_file = ConfigParser()
 config_file.read("config.ini")
-firstboot = config_file.getboolean('INSTALL', 'firstboot')
+firstboot = config_file.getboolean('GENERAL', 'firstboot')
 
 if firstboot:
     boot_file = open('/boot/config.txt', 'a')
@@ -16,7 +16,7 @@ if firstboot:
     boot_file.write('hdmi_cvt=800 480 60 6 0 0 0\n')
     boot_file.write('hdmi_drive=1\n')
 
-    config_file.set('INSTALL', 'firstboot', 'False')
+    config_file.set('GENERAL', 'firstboot', 'False')
     config_file.write(open("config.ini", "w"))
     sleep(1)
     os.system('sudo shutdown -r now')

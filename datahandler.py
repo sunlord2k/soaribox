@@ -19,7 +19,7 @@ class configuration:
         #  Config Parser Init:
         logging.basicConfig(filename='SoariBox.log', level=logging.WARNING)
         config_file = ConfigParser()
-        config_file.read("config.ini")
+        config_file.read("config_default.ini", "config_local.ini")
         # General Settings:
         self.debug = config_file.getboolean('GENERAL', 'debug')
         self.killit = config_file.getboolean('GENERAL', 'killit')

@@ -30,3 +30,8 @@ if firstboot is True:
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(10)
 #    os.system('sudo shutdown -r now')
+
+
+def update(self):
+    os.system('sudo apt-get update')
+    os.system('sudo apt-get upgrade')

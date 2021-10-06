@@ -39,6 +39,7 @@ if firstboot is True:
     wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
     # Create empty ssh file to get remote access
     ssh_file = open('/boot/ssh', 'x')
+    config_file_local.add_section('GENERAL')
     config_file_local.set('GENERAL', 'firstboot', 'False')
     config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('SOARIBOX: Written config Files')

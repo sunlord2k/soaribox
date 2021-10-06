@@ -8,6 +8,7 @@ from configparser import ConfigParser
 config_file = ConfigParser()
 config_file.read("/home/pi/soaribox/config_default.ini")
 firstboot = not exists('/home/pi/soaribox/config_local.ini')
+print(firstboot)
 wifiname = str(config_file.get('GENERAL', 'wifiname'))
 wifipass = str(config_file.get('GENERAL', 'wifipass'))
 
@@ -17,7 +18,7 @@ def update(self):
     os.system('sudo apt-get upgrade')
 
 
-def insertdisptoboot():
+def insertdisptoboot(*args):
     boot_file = open('/boot/config.txt', 'a')
     boot_file.write('\nhdmi_force_hotplug=1\n')
     boot_file.write('hdmi_group=2\n')
@@ -35,8 +36,11 @@ if firstboot is True:
     insertdisptoboot()
     print('SOARIBOX: Inserting WLAN Config')
     # Insert WIFI Details into wpa config
-    wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
-    wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
+    with open('/etc/wpa_supplicant/wpa_supplicant.conf') as f:
+        if 'network' not in f.read():
+            print("SOARIBOX: Inserting wpa supplican data")
+            wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
+            wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
     # Create empty ssh file to get remote access
     ssh_file = open('/boot/ssh', 'x')
     config_file_local.add_section('GENERAL')

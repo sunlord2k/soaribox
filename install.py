@@ -7,7 +7,7 @@ from configparser import ConfigParser
 # Read Config files:
 config_file = ConfigParser()
 config_file.read("/home/pi/soaribox/config_default.ini")
-firstboot = exists('/home/pi/soaribox/config_local.ini')
+firstboot = not exists('/home/pi/soaribox/config_local.ini')
 wifiname = str(config_file.get('GENERAL', 'wifiname'))
 wifipass = str(config_file.get('GENERAL', 'wifipass'))
 

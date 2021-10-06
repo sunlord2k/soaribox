@@ -12,6 +12,9 @@ git clone https://github.com/sunlord2k/soaribox
 Add the following line to /etc/rc.local
 sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py > /home/pi/soaribox/install.log 2>&1' &
 
+maybe try this:
+sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py 2>&1 | tee /home/pi/soaribox/install.log' &
+> /home/pi/soaribox/install.log 2>&1' &
 
 
 

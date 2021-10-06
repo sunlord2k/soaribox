@@ -34,20 +34,21 @@ if firstboot is True:
     config_file_local.read("home/pi/soaribox/config_local.ini")
     print('SOARIBOX: Inserting Modes for Screen')
     insertdisptoboot()
-    print('SOARIBOX: Inserting WLAN Config')
-    # Insert WIFI Details into wpa config
-    with open('/etc/wpa_supplicant/wpa_supplicant.conf') as f:
-        if 'network' not in f.read():
-            print("SOARIBOX: Inserting wpa supplican data")
-            wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
-            wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
-    # Create empty ssh file to get remote access
-    ssh_file = open('/boot/ssh', 'x')
-    config_file_local.add_section('GENERAL')
-    config_file_local.set('GENERAL', 'firstboot', 'False')
-    config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
-    print('SOARIBOX: Written config Files')
-    sleep(1)
-    print('SOARIBOX: System is going to reboot in 10 seconds')
-    sleep(10)
-    os.system('sudo shutdown -r now')
+os.system('sudo shutdown -r now')
+print('SOARIBOX: Inserting WLAN Config')
+# Insert WIFI Details into wpa config
+with open('/etc/wpa_supplicant/wpa_supplicant.conf') as f:
+    if 'network' not in f.read():
+        print("SOARIBOX: Inserting wpa supplican data")
+        wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
+        wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
+# Create empty ssh file to get remote access
+ssh_file = open('/boot/ssh', 'x')
+config_file_local.add_section('GENERAL')
+config_file_local.set('GENERAL', 'firstboot', 'False')
+config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
+print('SOARIBOX: Written config Files')
+sleep(1)
+print('SOARIBOX: System is going to reboot in 10 seconds')
+sleep(10)
+os.system('sudo shutdown -r now')

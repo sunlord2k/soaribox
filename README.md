@@ -1,14 +1,23 @@
 # soaribox
 SW &amp; HW for Soaribox
-
+123
 
 # Install process (only for raspbian):
+Generate a fresh install of raspbian
+Do no start the SoariBox, but do this on the SD-Card:
 
-cd /etc/
+cd /home/pi
+git clone https://github.com/sunlord2k/soaribox
 
-sudo git clone https://github.com/sunlord2k/soaribox
+Add the following line to /etc/rc.local
+sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py > /home/pi/soaribox/install.log 2>&1' &
 
-cd /etc/soaribox/dum1090
+
+
+
+This is for later:
+
+cd /home/pi/soaribox/dum1090
 
 sudo dpkg -i dump1090-mutability_1.14_armhf.deb
 

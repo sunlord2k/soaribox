@@ -9,6 +9,9 @@ import requests
 config_file = ConfigParser()
 config_file.read("/home/pi/soaribox/config_default.ini")
 firstboot = not exists('/home/pi/soaribox/config_local.ini')
+if not firstboot:
+    config_file_local = ConfigParser()
+    config_file_local.read("home/pi/soaribox/config_local.ini")
 
 
 def update(self):

@@ -4,8 +4,10 @@ import os
 from os.path import exists
 from configparser import ConfigParser
 import requests
+import logging
 
 # Read Config files:
+logging.basicConfig(filename='Install.log', level=logging.WARNING)
 config_file = ConfigParser()
 config_file.read("/home/pi/soaribox/config_default.ini")
 firstboot = not exists('/home/pi/soaribox/config_local.ini')
@@ -30,19 +32,22 @@ def insertdisptoboot(*args):
     print('SOARIBOX: Finished inserting Screen modes')
 
 
-def insertwifi(*args):
+def insertwifipart1(*args):
         # Insert WIFI Details into wpa config
         print('SOARIBOX: Inserting WLAN Config')
-        wifiname = str(config_file_local.get('GENERAL', 'wifiname'))
-        wifipass = str(config_file_local.get('GENERAL', 'wifipass'))
-        with open('/etc/wpa_supplicant/wpa_supplicant.conf') as f:
-            if 'network' not in f.read():
-                print("SOARIBOX: Inserting wpa supplican data")
-                wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
-                wpa_file.write('\ncountry=DE\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
         sleep(5)
         os.system('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /boot/wpa_supplicant.conf')
         print('SOARIBOX: Finished Inserting WLAN Config')
+
+
+def insertwifipart2(*args):
+    wifiname = str(config_file_local.get('GENERAL', 'wifiname'))
+    wifipass = str(config_file_local.get('GENERAL', 'wifipass'))
+    with open('/etc/wpa_supplicant/wpa_supplicant.conf') as f:
+        if 'network' not in f.read():
+            print("SOARIBOX: Inserting wpa supplican data")
+            wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
+            wpa_file.write('\ncountry=DE\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
 
 
 def setupconfigfiles(*args):
@@ -74,7 +79,7 @@ if firstboot is True:
     config_file_local.set('GENERAL', 'secondboot', 'True')
     config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('SOARIBOX: Written config Files')
-    insertwifi()
+    insertwifipart1()
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(1)
     os.system('sudo shutdown -r now')
@@ -82,6 +87,7 @@ if firstboot is True:
 config_file_local = ConfigParser()
 config_file_local.read("home/pi/soaribox/config_local.ini")
 secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
+insertwifipart2()
 if secondboot is True:
     print('Here starts the second boot!')
     print('Going to sleep for 60 seconds')
@@ -93,9 +99,9 @@ if secondboot is True:
         with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:
             f.write(r.content)
         updateos()
+        config_file_local.set('GENERAL', 'secondboot', 'False')
+        config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('The Internetcheck resulted in' + str(checkinternet()))
-    config_file_local.set('GENERAL', 'secondboot', 'False')
-    config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(1)
     os.system('sudo shutdown -r now')

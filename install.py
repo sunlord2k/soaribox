@@ -40,6 +40,7 @@ def insertwifi(*args):
                 print("SOARIBOX: Inserting wpa supplican data")
                 wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
                 wpa_file.write('\ncountry=DE\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
+        sleep(5)
         os.system('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /boot/wpa_supplicant.conf')
         print('SOARIBOX: Finished Inserting WLAN Config')
 

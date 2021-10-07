@@ -96,7 +96,7 @@ if secondboot is True:
     if checkinternet() is True:
         url = config_file_local.get('PATHS', 'xcsoarpath')
         r = requests.get(url)
-        with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:
+        with open('/home/pi/soaribox/xcsoar.deb', 'wb') as f:
             f.write(r.content)
         updateos()
         config_file_local.set('GENERAL', 'secondboot', 'False')

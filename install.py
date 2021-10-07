@@ -14,7 +14,7 @@ if not firstboot:
     config_file_local.read("home/pi/soaribox/config_local.ini")
 
 
-def update(self):
+def updateos(self):
     os.system('sudo apt-get update')
     os.system('sudo apt-get upgrade')
 
@@ -81,6 +81,7 @@ secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
 if secondboot is True:
     print('Here starts the second boot!')
     if checkinternet() is True:
+        updateos()
         url = config_file_local.get('PATHS', 'xcsoarpath')
         r = requests.get(url)
         with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:

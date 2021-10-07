@@ -40,7 +40,7 @@ def insertwifi(*args):
                 print("SOARIBOX: Inserting wpa supplican data")
                 wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
                 wpa_file.write('\ncountry=DE\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
-        os.system('sudo rfkill unblock 0')
+        os.system('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /boot/wpa_supplicant.conf')
         print('SOARIBOX: Finished Inserting WLAN Config')
 
 
@@ -78,6 +78,8 @@ if firstboot is True:
     sleep(1)
     os.system('sudo shutdown -r now')
 
+config_file_local = ConfigParser()
+config_file_local.read("home/pi/soaribox/config_local.ini")
 secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
 if secondboot is True:
     print('Here starts the second boot!')

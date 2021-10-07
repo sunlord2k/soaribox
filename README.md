@@ -12,9 +12,10 @@ git clone https://github.com/sunlord2k/soaribox
 Add the following line to /etc/rc.local
 sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py > /home/pi/soaribox/install.log 2>&1' &
 
-maybe try this:
-sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py 2>&1 | tee -a /home/pi/soaribox/install.log' &
+maybe try this on rc.local(works but no real logging):
+sudo bash -c '/usr/bin/python3 /home/pi/soaribox/install.py | tee -a /home/pi/soaribox/install.log 2>&1' &
 
+Next try with cronjob:
 
 
 
@@ -28,12 +29,10 @@ In addition lighttpd webserver has to be installed!!!
 All files from /etc/soaribox/dump1090/dump1090_thml go to /var/www/html/dump1090
 Config file for lighttpd goes from /etc/soaribox/dump1090/89.... to /etc/lighttpd/conf-enabled
 
-Probably some more stuff which I forgot but will be added to install.sh
 
 
 # Pathes & things to know:
 
-Logfiles: /etc/soaribox/soaribox.log
 
 Status of dump1090 can be obtained via systemctl dump1090
 

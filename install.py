@@ -73,14 +73,16 @@ if firstboot is True:
     sleep(10)
     os.system('sudo shutdown -r now')
 
-if config_file_local.getboolean('GENERAL', 'secondboot') is True:
-    config_file_local.set('GENERAL', 'secondboot', 'False')
-    config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
+secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
+print(secondboot)
+if secondboot is True:
     if checkinternet() is True:
         url = config_file_local.get('PATHS', 'xcsoarpath')
         r = requests.get(url)
         with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:
             f.write(r.content)
+    config_file_local.set('GENERAL', 'secondboot', 'False')
+    config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(10)
     os.system('sudo shutdown -r now')

@@ -61,6 +61,7 @@ def checkinternet(*ags):
 
 
 if firstboot is True:
+    print('Here starts the first boot!')
     setupconfigfiles()
     config_file_local = ConfigParser()
     config_file_local.read("home/pi/soaribox/config_local.ini")
@@ -77,8 +78,8 @@ if firstboot is True:
     os.system('sudo shutdown -r now')
 
 secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
-print(secondboot)
 if secondboot is True:
+    print('Here starts the second boot!')
     if checkinternet() is True:
         url = config_file_local.get('PATHS', 'xcsoarpath')
         r = requests.get(url)

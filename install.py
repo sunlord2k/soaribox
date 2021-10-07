@@ -14,9 +14,9 @@ if not firstboot:
     config_file_local.read("home/pi/soaribox/config_local.ini")
 
 
-def updateos(self):
+def updateos(*args):
     os.system('sudo apt-get update')
-    os.system('sudo apt-get upgrade')
+    os.system('sudo apt-get upgrade -y')
 
 
 def insertdisptoboot(*args):
@@ -39,7 +39,7 @@ def insertwifi(*args):
             if 'network' not in f.read():
                 print("SOARIBOX: Inserting wpa supplican data")
                 wpa_file = open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a')
-                wpa_file.write('\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
+                wpa_file.write('\ncountry=DE\nnetwork={\n       ssid="'+wifiname+'"\n       psk="'+wifipass+'"\n       key_mgmt=WPA-PSK\n}')
         print('SOARIBOX: Finished Inserting WLAN Config')
 
 

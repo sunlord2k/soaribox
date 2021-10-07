@@ -3,7 +3,6 @@ from time import sleep
 import os
 from os.path import exists
 from configparser import ConfigParser
-import wget
 import requests
 
 # Read Config files:
@@ -79,7 +78,9 @@ if config_file_local.getboolean('GENERAL', 'secondboot') is True:
     config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     if checkinternet() is True:
         url = config_file_local.get('PATHS', 'xcsoarpath')
-        wget(url, '/home/pi/soaribox/xcsoar.deb')
+        r = requests.get(url)
+        with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:
+            f.write(r.content)
     print('SOARIBOX: System is going to reboot in 10 seconds')
     sleep(10)
     os.system('sudo shutdown -r now')

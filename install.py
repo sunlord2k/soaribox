@@ -81,11 +81,11 @@ secondboot = config_file_local.getboolean('GENERAL', 'secondboot')
 if secondboot is True:
     print('Here starts the second boot!')
     if checkinternet() is True:
-        updateos()
         url = config_file_local.get('PATHS', 'xcsoarpath')
         r = requests.get(url)
         with open('/home/pi/soaibox/xcsoar.deb', 'wb') as f:
             f.write(r.content)
+        updateos()
     config_file_local.set('GENERAL', 'secondboot', 'False')
     config_file_local.write(open('/home/pi/soaribox/config_local.ini', 'w'))
     print('SOARIBOX: System is going to reboot in 10 seconds')

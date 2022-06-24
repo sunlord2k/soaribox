@@ -14,10 +14,7 @@ def startxserver(*args):
     os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
 
 
-startxserver()
-print('Before Sleep')
-sleep(10)
-print('After Sleep')
+# startxserver()
 menu.loadconfig()
 menu.startmenu()
 # xcsoar = threading.Thread(target=startxcsoar, args=(0,))

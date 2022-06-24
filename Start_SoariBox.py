@@ -11,7 +11,7 @@ def startxcsoar(*args):
 
 
 def startxserver(*args):
-    os.system('sudo /usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
+    os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
 
 
 startxserver()

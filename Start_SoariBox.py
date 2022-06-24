@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from time import sleep
 import Menu as menu
 import datahandler as datahandler
 import os
@@ -14,10 +15,13 @@ def startxserver(*args):
 
 
 startxserver()
+print('Before Sleep')
+sleep(10)
+print('After Sleep')
 menu.loadconfig()
 menu.startmenu()
-xcsoar = threading.Thread(target=startxcsoar, args=(0,))
-xcsoar.start()
+# xcsoar = threading.Thread(target=startxcsoar, args=(0,))
+# xcsoar.start()
 # startdatahandler = threading.Thread(target=datahandler.starthandler)
 # startdatahandler.start()
 print('This is just a test!')

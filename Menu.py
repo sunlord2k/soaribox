@@ -122,6 +122,7 @@ def startmenu(*args):
                 bar['value'] = (5-count)*20
             else:
                 Master.destroy()
+                os.system('killall Xorg')
                 return 1
 
     def setinterrupt(*args):
@@ -148,6 +149,7 @@ def startmenu(*args):
 
 
 def loadconfig(*args):
+    os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
     global configfile
     config_file = ConfigParser()
     config_file.read("config.ini")

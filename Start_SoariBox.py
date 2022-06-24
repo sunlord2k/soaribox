@@ -14,7 +14,8 @@ def startxserver(*args):
 
 
 startxserver()
-menu.menustart()
+menu.loadconfig()
+menu.startmenu()
 xcsoar = threading.Thread(target=startxcsoar, args=(0,))
 xcsoar.start()
 # startdatahandler = threading.Thread(target=datahandler.starthandler)

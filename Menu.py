@@ -147,12 +147,16 @@ def startmenu(*args):
     Master.mainloop()
 
 
-# Confif File preparation
-if __name__ == '__main__':
+def loadconfig(*args):
     global configfile
     config_file = ConfigParser()
     config_file.read("config.ini")
     global config_menu
     config_menu = ConfigParser()
     config_menu.read("menu.ini")
+
+
+# Confif File preparation
+if __name__ == '__main__':
+    loadconfig()
     startmenu()

@@ -10,13 +10,11 @@ def startxcsoar(*args):
     os.system('/usr/bin/xcsoar')
 
 
-def startxserver(*args):
-    os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
-
-
-# startxserver()
+os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
+sleep(10)
 menu.loadconfig()
 menu.startmenu()
+os.system('killall Xorg')
 # xcsoar = threading.Thread(target=startxcsoar, args=(0,))
 # xcsoar.start()
 # startdatahandler = threading.Thread(target=datahandler.starthandler)

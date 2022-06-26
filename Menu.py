@@ -131,10 +131,10 @@ def startmenu(*args):
     def loadconfig(*args):
         global config_file
         config_file = ConfigParser()
-        config_file.read("config_local.ini")
+        config_file.read("/home/pi/soaribox/config_local.ini")
         global config_menu
         config_menu = ConfigParser()
-        config_menu.read("menu.ini")
+        config_menu.read("/home/pi/soaribox/menu.ini")
 
     loadconfig()
     Master = Tk()

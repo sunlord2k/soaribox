@@ -17,9 +17,9 @@ import os
 class configuration:
     def __init__(self, *args):
         #  Config Parser Init:
-        logging.basicConfig(filename='SoariBox.log', level=logging.WARNING)
+        logging.basicConfig(filename='/home/pi/soaribox/SoariBox.log', level=logging.WARNING)
         config_file = ConfigParser()
-        config_file.read("config_default.ini")
+        config_file.read("/home/pi/soaribox/config_default.ini")
         # General Settings:
         self.debug = config_file.getboolean('GENERAL', 'debug')
         self.killit = config_file.getboolean('GENERAL', 'killit')
@@ -49,7 +49,6 @@ class watchdog_local(threading.Thread):
         self.id = id
         self.name = name
         self.status = 0 # 0= Everthing okay, 1 = Prewarning 2 = Watchdog triggered 4 = Kill the Thread 9 = Starting UP
-        self.kill = 0
 
     def run(self):
         self.status = 9

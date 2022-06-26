@@ -128,6 +128,15 @@ def startmenu(*args):
     def setinterrupt(*args):
         interruptcountdown.set(1)
 
+    def loadconfig(*args):
+        global config_file
+        config_file = ConfigParser()
+        config_file.read("config_local.ini")
+        global config_menu
+        config_menu = ConfigParser()
+        config_menu.read("menu.ini")
+
+    loadconfig()
     Master = Tk()
     Master.geometry('800x400')
     Master.title("SoariBox Configuration")
@@ -148,17 +157,6 @@ def startmenu(*args):
     Master.mainloop()
 
 
-def loadconfig(*args):
-    os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
-    global configfile
-    config_file = ConfigParser()
-    config_file.read("config.ini")
-    global config_menu
-    config_menu = ConfigParser()
-    config_menu.read("menu.ini")
-
-
 # Confif File preparation
 if __name__ == '__main__':
-    loadconfig()
     startmenu()

@@ -17,9 +17,15 @@ import os
 class configuration:
     def __init__(self, *args):
         #  Config Parser Init:
-        logging.basicConfig(filename='/home/pi/soaribox/SoariBox.log', level=logging.WARNING)
-        config_file = ConfigParser()
-        config_file.read("/home/pi/soaribox/config_default.ini")
+        if os.uname()[4][:3] == 'aar':
+            logging.basicConfig(filename='/home/pi/soaribox/SoariBox.log', level=logging.WARNING)
+            config_file = ConfigParser()
+            config_file.read("/home/pi/soaribox/config_default.ini")
+        else:
+            logging.basicConfig(filename='/home/steffen/gits/soaribox/SoariBox.log', level=logging.WARNING)
+            config_file = ConfigParser()
+            config_file.read("/home/steffen/gits/soaribox/config_default.ini")
+
         # General Settings:
         self.debug = config_file.getboolean('GENERAL', 'debug')
         self.killit = config_file.getboolean('GENERAL', 'killit')

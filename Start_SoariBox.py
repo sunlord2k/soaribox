@@ -11,7 +11,10 @@ def startxcsoar(*args):
 
 
 def startmenux(*args):
-    os.system('sudo xinit /usr/bin/python3 /home/pi/soaribox/Menu.py ')
+    if os.uname()[4][:3] == 'aar':
+        os.system('sudo xinit /usr/bin/python3 /home/pi/soaribox/Menu.py ')
+    else:
+        os.system('sudo /usr/bin/python3 /home/steffen/gits/soaribox/Menu.py ')
 
 
 startmenux()

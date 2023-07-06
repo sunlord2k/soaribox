@@ -7,7 +7,7 @@ import threading
 
 
 def startxcsoar(*args):
-    os.system('/usr/bin/xcsoar')
+    os.system('/usr/bin/xcsoar -fly')
 
 
 def startmenux(*args):

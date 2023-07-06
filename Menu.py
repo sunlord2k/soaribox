@@ -51,7 +51,7 @@ def startmenu(*args):
             config_file['SLOTCARDS']['card3'] = card3
             config_file['SLOTCARDS']['card4'] = card4
             config_file['SLOTCARDS']['card5'] = card5
-            with open('config.ini', 'w') as configfile:
+            with open('config_local.ini', 'w') as configfile:
                 config_file.write(configfile)
 
     # General Page layout
@@ -131,10 +131,17 @@ def startmenu(*args):
     def loadconfig(*args):
         global config_file
         config_file = ConfigParser()
-        config_file.read("/home/pi/soaribox/config_local.ini")
+        if os.uname()[4][:3] == 'aar':
+            config_file.read("/home/pi/soaribox/config_local.ini")
+        else:
+            config_file.read("/home/steffen/gits/soaribox/config_local.ini")
         global config_menu
         config_menu = ConfigParser()
-        config_menu.read("/home/pi/soaribox/menu.ini")
+        if os.uname()[4][:3] == 'aar':
+            config_menu.read("/home/pi/soaribox/menu.ini")
+        else:
+            config_menu.read("/home/steffen/gits/soaribox/menu.ini")
+
 
     loadconfig()
     Master = Tk()

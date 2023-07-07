@@ -26,3 +26,5 @@ def setbrightness(tmp,*args):
 #            sleep(0.01)
 #            print(duty)
 #        sleep(0.5)
+if __name__ == '__main__':
+    setbrightness(10)

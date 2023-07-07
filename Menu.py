@@ -3,6 +3,8 @@ from configparser import ConfigParser
 from tkinter import *
 from tkinter.ttk import *
 import os
+if os.uname()[4][:3] == 'aar':
+    import backlight_control as backlight_control
 
 
 def startmenu(*args):
@@ -110,8 +112,26 @@ def startmenu(*args):
     def sub22():
         donothing
 
+
     def sub23():
-        donothing
+
+        def setbrightness(tmp,*args):
+            config_file['GENERAL']['display_brightness'] = tmp
+            with open('config_local.ini', 'w') as configfile:
+                config_file.write(configfile)
+
+    # General Page layout
+        brightnessconfig = Toplevel()
+        brightnessconfig.geometry('1920x1200')
+        brightnessconfig.title("Slot-Card-Configuration")
+        Abstand = 10
+        menu = mainmenu(brightnessconfig)
+    # Button section
+        closebutton = Button(brightnessconfig, text="Close brightnessconfig", command=brightnessconfig.destroy)
+        closebutton.grid(row=6, column=5, pady=5)
+        savebutton = Button(brightnessconfig, text="Save brightnessconfig", command=setbrightness)
+        savebutton.grid(row=7, column=5, pady=5)
+
 
     def countdown(count):
         CounterLabel['text'] = count
@@ -133,6 +153,7 @@ def startmenu(*args):
         config_file = ConfigParser()
         if os.uname()[4][:3] == 'aar':
             config_file.read("/home/pi/soaribox/config_local.ini")
+            backlight_control.setbrightness(config_file['GENERAL']['display_brightness'])
         else:
             config_file.read("/home/steffen/gits/soaribox/config_local.ini")
         global config_menu

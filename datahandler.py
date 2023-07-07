@@ -171,12 +171,17 @@ class nmea_out(configuration):
             latestdata = gpsp.get_current_value()
             if hasattr(latestdata, 'class'):
                 if latestdata['class'] == 'TPV':
-                    datastorage['gps_long'] = latestdata.lon
-                    datastorage['gps_lat'] = float(latestdata.lat)
-                    datastorage['gps_time_utc'] = latestdata.time
-                    datastorage['gps_speed_ms'] = latestdata.speed
+                    if hasattr(latestdata, 'lon'):
+                        datastorage['gps_long'] = latestdata.lon
+                    if hasattr(latestdata, 'lat'):
+                        datastorage['gps_lat'] = float(latestdata.lat)
+                    if hasattr(latestdata, 'time'):
+                        datastorage['gps_time_utc'] = latestdata.time
+                    if hasattr(latestdata, 'speed'):
+                        datastorage['gps_speed_ms'] = latestdata.speed
                     datastorage['gps_sats'] = 10  # Still under testing
-                    datastorage['gps_fix_mode'] = int(latestdata.mode)
+                    if hasattr(latestdata, 'mode'):
+                        datastorage['gps_fix_mode'] = int(latestdata.mode)
                     if hasattr(latestdata, 'track'):
                         datastorage['gps_track'] = latestdata.track
                     if hasattr(latestdata, 'alt'):

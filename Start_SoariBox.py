@@ -13,6 +13,7 @@ def startxcsoar(*args):
 def startmenux(*args):
     if os.uname()[4][:3] == 'aar':
         os.system('sudo xinit /usr/bin/python3 /home/pi/soaribox/Menu.py ')
+        os.system('/usr/bin/vlc /home/pi/soaribox/graphics/output.mp4 --no-osd vlc://quit')
     else:
         os.system('sudo /usr/bin/python3 /home/steffen/gits/soaribox/Menu.py ')
 

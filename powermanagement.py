@@ -7,7 +7,7 @@ address = 0x61
 
 bus = smbus.SMBus(1)
 while True:
-    bus.write_byte(address, 0x34)
+    bus.write_byte(address, 0x33)
     time.sleep(1)
     read = bus.read_byte(address)
     print(read)

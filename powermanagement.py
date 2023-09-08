@@ -10,4 +10,5 @@ while True:
     bus.write_byte(address, 0x33)
     time.sleep(1)
     read = bus.read_byte(address)
+    read = hex(read)
     print(read)

@@ -7,13 +7,13 @@ import RPi.GPIO as GPIO
 from time import sleep
 
 def setbrightness(tmp,*args):
-    ledpin = 13				# PWM pin connected to LED
-    GPIO.setwarnings(True)			#disable warnings
-    GPIO.setmode(GPIO.BCM)			#set pin numbering system
-    GPIO.setup(ledpin,GPIO.OUT)
-    pi_pwm = GPIO.PWM(ledpin,1000)		#create PWM instance with frequency
-    pi_pwm.start(0)				#start PWM of required Duty Cycle
-    pi_pwm.ChangeDutyCycle(tmp)
+	ledpin = 13				# PWM pin connected to LED
+	GPIO.setwarnings(True)			#disable warnings
+	GPIO.setmode(GPIO.BCM)			#set pin numbering system
+	GPIO.setup(ledpin,GPIO.OUT)
+	pi_pwm = GPIO.PWM(ledpin, 500)		#create PWM instance with frequency
+	pi_pwm.start(tmp)				#start PWM of required Duty Cycle
+#    pi_pwm.ChangeDutyCycle(0)
 #    while True:
 #        for duty in range(0,101,1):
 #            pi_pwm.ChangeDutyCycle(duty) #provide duty cycle in the range 0-100
@@ -27,4 +27,6 @@ def setbrightness(tmp,*args):
 #            print(duty)
 #        sleep(0.5)
 if __name__ == '__main__':
-    setbrightness(10)
+	setbrightness(10)
+	while True:
+		i=0

@@ -26,7 +26,7 @@ while True:
     match read:
         case "0x33":
             donothing()
-        
+
         case "0x34":
             os.system('sudo halt -p')
     """

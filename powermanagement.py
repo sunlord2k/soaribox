@@ -26,12 +26,7 @@ while True:
     match read:
         case "0x33":
             donothing()
-
+            print('Received 0x33')
         case "0x34":
             os.system('sudo halt -p')
-    """
-    if not is_process_running('xcsoar'):
-        bus.write_byte(address, 0x34)
-    else:
-        bus.write_byte(address, 0x33)
-    """
+            print('received 0x34')

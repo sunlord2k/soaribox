@@ -47,7 +47,7 @@ def getrotary():
 			counter += 1
 		else:
 			counter -= 1
-		os.system('clear')
+		#os.system('clear')
 		print(counter)
 	clkLastState = clkState
 	time.sleep(0.001)
@@ -57,4 +57,6 @@ if __name__ == '__main__':
 	setbrightness(10)
 	while True:
 		getrotary()
+		print(counter)
 		setbrightness(counter)
+

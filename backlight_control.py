@@ -48,7 +48,7 @@ def main(*args):
 				else:
 					if counter > 0:
 						counter -= 5
-				print("Backlight brightness changed to: " + str(100 - counter))
+				print("Backlight brightness changed to: " + str(counter))
 				pi_pwm.ChangeDutyCycle(100 - counter)
 			clkLastState = clkState
 			time.sleep(0.001)

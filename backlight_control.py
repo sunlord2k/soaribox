@@ -11,8 +11,6 @@ ledpin = 13				# PWM pin connected to LED
 rotary_dt = 4
 rotary_clk = 5
 rotary_sw = 22
-global counter = 0
-global clkLastState = GPIO.input(rotary_clk)
 GPIO.setwarnings(True)				# disable warnings
 GPIO.setmode(GPIO.BCM)				# set pin numbering system
 GPIO.setup(ledpin, GPIO.OUT)
@@ -39,6 +37,9 @@ def printstuff():
 
 
 def getrotary():
+	global counter, clkLastState
+	counter = 0
+	clkLastState = GPIO.input(rotary_clk)
 	clkState = GPIO.input(rotary_clk)
 	dtState = GPIO.input(rotary_dt)
 	if clkState != clkLastState:

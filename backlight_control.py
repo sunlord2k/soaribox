@@ -58,5 +58,5 @@ if __name__ == '__main__':
 	while True:
 		pwm = getrotary(counter)
 		print(counter)
-		setbrightness(pwm)
+		# setbrightness(pwm)
 

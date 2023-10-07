@@ -35,7 +35,7 @@ def printstuff():
 	time.sleep(0.1)
 
 
-if __name__ == '__main__':
+def main(*args):
 	pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
 	pi_pwm.start(100)
 	setbrightness(100)
@@ -58,3 +58,7 @@ if __name__ == '__main__':
 			time.sleep(0.001)
 	finally:
 		GPIO.cleanup()
+
+
+if __name__ == '__main__':
+	main()

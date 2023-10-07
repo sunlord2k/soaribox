@@ -46,9 +46,11 @@ if __name__ == '__main__':
 			dtState = GPIO.input(rotary_dt)
 			if clkState != clkLastState:
 				if dtState != clkState:
-					counter += 1
+					if counter < 100:
+						counter += 1
 				else:
-					counter -= 1
+					if counter > 0:
+						counter -= 1
 				print(counter)
 			clkLastState = clkState
 			time.sleep(0.01)

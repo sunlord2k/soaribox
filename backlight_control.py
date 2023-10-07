@@ -20,7 +20,7 @@ GPIO.setup(rotary_clk, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 def setbrightness(dutycycle, *args):
-	pi_pwm.start(dutycycle)					# start PWM of required Duty Cycle
+	pi_pwm.ChangeDutyCycle(dutycycle)					# start PWM of required Duty Cycle
 
 
 def donothing():
@@ -37,7 +37,8 @@ def printstuff():
 
 if __name__ == '__main__':
 	pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
-	setbrightness(10)
+	pi_pwm.start(100)
+	setbrightness(100)
 	counter = 0
 	clkLastState = GPIO.input(rotary_clk)
 	try:

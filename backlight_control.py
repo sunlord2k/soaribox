@@ -37,8 +37,7 @@ def printstuff():
 
 
 def getrotary(counter):
-	global counter, clkLastState
-	clkLastState = GPIO.input(rotary_clk)
+	global clkLastState
 	clkState = GPIO.input(rotary_clk)
 	dtState = GPIO.input(rotary_dt)
 	if clkState != clkLastState:
@@ -46,7 +45,7 @@ def getrotary(counter):
 			counter += 1
 		else:
 			counter -= 1
-		#os.system('clear')
+		# os.system('clear')
 		return counter
 	clkLastState = clkState
 	time.sleep(0.001)
@@ -54,6 +53,7 @@ def getrotary(counter):
 
 if __name__ == '__main__':
 	setbrightness(10)
+	clkLastState = GPIO.input(rotary_clk)
 	while True:
 		counter = getrotary(counter)
 		print(counter)

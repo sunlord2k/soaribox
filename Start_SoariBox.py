@@ -4,6 +4,7 @@ import Menu as menu
 import datahandler as datahandler
 import os
 import threading
+import backlight_control as backlight_control
 
 
 def startxcsoar(*args):
@@ -21,6 +22,8 @@ def startmenux(*args):
 startmenux()
 startdatahandler = threading.Thread(target=datahandler.starthandler)
 startdatahandler.start()
+startbacklight = threading.Thread(target=backlight_control.main)
+startbacklight.start()
 startxcsoar()
 # os.system('/usr/bin/X11/X -nolisten tcp -dpi 96 :0 > /dev/null 2>&1')
 # sleep(10)

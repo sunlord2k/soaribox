@@ -38,22 +38,19 @@ def printstuff():
 
 if __name__ == '__main__':
 	setbrightness(10)
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-	GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 	counter = 0
-	clkLastState = GPIO.input(clk)
+	clkLastState = GPIO.input(rotary_clk)
 	try:
 		while True:
-				clkState = GPIO.input(clk)
-				dtState = GPIO.input(dt)
-				if clkState != clkLastState:
-					if dtState != clkState:
-						counter += 1
-					else:
-						counter -= 1
-					print counter
-				clkLastState = clkState
-				sleep(0.01)
+			clkState = GPIO.input(rotary_clk)
+			dtState = GPIO.input(rotary_dt)
+			if clkState != clkLastState:
+				if dtState != clkState:
+					counter += 1
+				else:
+					counter -= 1
+				print(counter)
+			clkLastState = clkState
+			time.sleep(0.01)
 	finally:
-			GPIO.cleanup()
+		GPIO.cleanup()

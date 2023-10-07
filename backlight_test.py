@@ -22,5 +22,6 @@ def donothing():
 
 
 if __name__ == '__main__':
-	pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
-	pi_pwm.start(100)					# start PWM of required Duty Cycle
+	while True:
+        pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
+        pi_pwm.start(100)					# start PWM of required Duty Cycle

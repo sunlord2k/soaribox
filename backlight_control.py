@@ -52,6 +52,7 @@ if __name__ == '__main__':
 					if counter > 0:
 						counter -= 5
 				print(counter)
+				setbrightness(counter)
 			clkLastState = clkState
 			time.sleep(0.01)
 	finally:

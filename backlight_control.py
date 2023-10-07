@@ -53,8 +53,8 @@ if __name__ == '__main__':
 					if counter > 0:
 						counter -= 5
 				print(counter)
-				setbrightness(counter)
+				setbrightness(100 - counter)
 			clkLastState = clkState
-			time.sleep(0.01)
+			time.sleep(0.001)
 	finally:
 		GPIO.cleanup()

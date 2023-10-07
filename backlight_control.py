@@ -47,10 +47,10 @@ if __name__ == '__main__':
 			if clkState != clkLastState:
 				if dtState != clkState:
 					if counter < 100:
-						counter += 1
+						counter += 5
 				else:
 					if counter > 0:
-						counter -= 1
+						counter -= 5
 				print(counter)
 			clkLastState = clkState
 			time.sleep(0.01)

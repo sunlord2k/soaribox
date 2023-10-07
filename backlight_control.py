@@ -56,7 +56,7 @@ if __name__ == '__main__':
 	clkLastState = GPIO.input(rotary_clk)
 	counter = 0
 	while True:
-		counter = getrotary(counter)
+		pwm = getrotary(counter)
 		print(counter)
-		setbrightness(counter)
+		setbrightness(pwm)
 

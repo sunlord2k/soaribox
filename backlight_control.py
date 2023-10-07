@@ -45,10 +45,10 @@ def getrotary(counter):
 			counter += 1
 		else:
 			counter -= 1
-		# os.system('clear')
+		os.system('clear')
 		return counter
 	clkLastState = clkState
-	time.sleep(0.001)
+	time.sleep(0.01)
 
 
 if __name__ == '__main__':

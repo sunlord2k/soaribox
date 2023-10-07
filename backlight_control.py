@@ -51,7 +51,6 @@ def getrotary():
 		print(counter)
 	clkLastState = clkState
 	time.sleep(0.001)
-	GPIO.cleanup()
 
 
 if __name__ == '__main__':

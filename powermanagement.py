@@ -22,15 +22,10 @@ def donothing():
 def readbus():
     time.sleep(1)
     busreading = hex(bus.read_byte(address))
-    match busreading:
-        case "0x31":
-            print('Received 0x31')
-        case "0x33":
-            donothing()
-            print('Received 0x33')
-        case "0x34":
-            os.system('sudo halt -p')
-            print('received 0x34')
+    if busreading == "0x34":
+        os.system('sudo halt -p')
+    else:
+        print ('Received'+ busreading)
 
 
 global bus = smbus.SMBus(1)

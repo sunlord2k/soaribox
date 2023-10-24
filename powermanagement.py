@@ -25,14 +25,13 @@ def readbus():
     if busreading == "0x34":
         os.system('sudo halt -p')
     else:
-        print ('Received'+ busreading)
+        print('Received' + busreading)
 
 
 bus = smbus.SMBus(1)
 while True:
     try:
         readbus()
-        break
     except Exception as e:
         print("Function errored out!", e)
         print("Retrying ... ")

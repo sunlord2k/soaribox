@@ -21,8 +21,8 @@ def donothing():
 
 def readbus():
     time.sleep(1)
-    read = hex(bus.read_byte(address))
-    match read:
+    busreading = hex(bus.read_byte(address))
+    match busreading:
         case "0x31":
             print('Received 0x31')
         case "0x33":

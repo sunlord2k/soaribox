@@ -28,7 +28,7 @@ def readbus():
         print ('Received'+ busreading)
 
 
-global bus = smbus.SMBus(1)
+bus = smbus.SMBus(1)
 while True:
     try:
         readbus()

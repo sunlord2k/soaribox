@@ -33,7 +33,7 @@ def readbus():
             print('received 0x34')
 
 
-bus = smbus.SMBus(1)
+global bus = smbus.SMBus(1)
 while True:
     try:
         readbus()

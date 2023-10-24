@@ -24,10 +24,3 @@ while True:
     time.sleep(1)
     read = hex(bus.read_byte(address))
     print(read)
-    match read:
-        case "0x33":
-            donothing()
-            print('Received 0x33')
-        case "0x34":
-            # os.system('sudo halt -p')
-            print('received 0x34')

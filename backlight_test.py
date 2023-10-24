@@ -1,27 +1,33 @@
-'''
-Control the Brightness of LED using PWM on Raspberry Pi
-http://www.electronicwings.com
-'''
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
+import smbus
+import time
+import psutil
+# import os
 
-import RPi.GPIO as GPIO
-
-ledpin = 13				# PWM pin connected to LED
-
-GPIO.setwarnings(True)				# disable warnings
-GPIO.setmode(GPIO.BCM)				# set pin numbering system
-GPIO.setup(ledpin, GPIO.OUT)
+address = 0x61
 
 
-def setbrightness(dutycycle, *args):
-    pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
-    pi_pwm.start(dutycycle)					# start PWM of required Duty Cycle
+def is_process_running(name):
+    for process in psutil.process_iter(['name']):
+        if process.info['name'] == name:
+            return True
+    return False
 
 
 def donothing():
     pass
 
 
-if __name__ == '__main__':
-    pi_pwm = GPIO.PWM(ledpin, 1000)		# create PWM instance with frequency
-    while True:
-        pi_pwm.start(100)					# start PWM of required Duty Cycle
+bus = smbus.SMBus(1)
+while True:
+    time.sleep(1)
+    read = hex(bus.read_byte(address))
+    print(read)
+    match read:
+        case "0x33":
+            donothing()
+            print('Received 0x33')
+        case "0x34":
+            # os.system('sudo halt -p')
+            print('received 0x34')

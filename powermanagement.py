@@ -29,20 +29,19 @@ def donothing():
     pass
 
 
+def readbus():
+    time.sleep(1)
+    busreading = hex(bus.read_byte(address))
+    if busreading == "0x34":
+        os.system('sudo halt -p')
+    else:
+        print('Received' + busreading)
+
+
 bus = smbus.SMBus(1)
 while True:
-    time.sleep(1)
-    read = hex(bus.read_byte(address))
-    match read:
-        case "0x33":
-            donothing()
-            pressed = 0
-            safepressed(pressed)
-
-        case "0x34":
-            os.system('sudo halt -p')
-
-        case "p":
-            pressed = pressed + 1
-            safepressed(pressed)
-            send_udp("SoariBox is going to shutdown in..", UDP_IP, UDP_PORT)
+    try:
+        readbus()
+    except Exception as e:
+        print("Function errored out!", e)
+        print("Retrying ... ")

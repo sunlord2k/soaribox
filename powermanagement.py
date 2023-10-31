@@ -4,8 +4,12 @@ import smbus
 import time
 import psutil
 import os
+from librarys.udpsend import send_udp
 
 address = 0x61
+pressed = 0
+UDP_IP = "127.0.0.1"
+UDP_PORT = 4353
 
 
 def is_process_running(name):
@@ -15,23 +19,29 @@ def is_process_running(name):
     return False
 
 
+def safepressed(p):
+    f = open("keypressed.txt", "w")
+    f.write(p)
+    f.close()
+
+
 def donothing():
     pass
 
 
+def readbus():
+    time.sleep(1)
+    busreading = hex(bus.read_byte(address))
+    if busreading == "0x34":
+        os.system('sudo halt -p')
+    else:
+        print('Received' + busreading)
+
+
 bus = smbus.SMBus(1)
 while True:
-    time.sleep(1)
-    read = hex(bus.read_byte(address))
-    match read:
-        case "0x33":
-            donothing()
-
-        case "0x34":
-            os.system('sudo halt -p')
-    """
-    if not is_process_running('xcsoar'):
-        bus.write_byte(address, 0x34)
-    else:
-        bus.write_byte(address, 0x33)
-    """
+    try:
+        readbus()
+    except Exception as e:
+        print("Function errored out!", e)
+        print("Retrying ... ")

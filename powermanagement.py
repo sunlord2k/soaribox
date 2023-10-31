@@ -4,8 +4,12 @@ import smbus
 import time
 import psutil
 import os
+from librarys.udpsend import send_udp
 
 address = 0x61
+pressed = 0
+UDP_IP = "127.0.0.1"
+UDP_PORT = 4353
 
 
 def is_process_running(name):
@@ -13,6 +17,12 @@ def is_process_running(name):
         if process.info['name'] == name:
             return True
     return False
+
+
+def safepressed(p):
+    f = open("keypressed.txt", "w")
+    f.write(p)
+    f.close()
 
 
 def donothing():
@@ -26,12 +36,13 @@ while True:
     match read:
         case "0x33":
             donothing()
+            pressed = 0
+            safepressed(pressed)
 
         case "0x34":
             os.system('sudo halt -p')
-    """
-    if not is_process_running('xcsoar'):
-        bus.write_byte(address, 0x34)
-    else:
-        bus.write_byte(address, 0x33)
-    """
+
+        case "p":
+            pressed = pressed + 1
+            safepressed(pressed)
+            send_udp("SoariBox is going to shutdown in..", UDP_IP, UDP_PORT)
